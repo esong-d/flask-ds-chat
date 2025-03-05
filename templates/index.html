@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DS-AI</title>
+    <style>
+        .message {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            background-color: #a6d4db; /* 设置背景颜色为浅蓝色 */
+        }
+        .system {
+            margin-bottom: 20px;
+            background-color: #d1e7dd;
+            float: left;
+            clear: both;
+        }
+        .user {
+            margin-bottom: 20px;
+            background-color: #f8d7da;
+            float: right;
+            clear: both;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+        #stream-data {
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .input-group {
+            max-width: 90%;
+            margin: 0 auto;
+            padding: 10px;
+            /* border: 1px solid #ddd;
+            border-radius: 5px; */
+        }
+        .input-group input {
+            width: 85%;
+            height: 50px;
+            background-color: #f0f8ff; /* 设置输入框背景颜色 */
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 10px;
+        }
+        .input-group button {
+            width: 100px;
+            height: 50px;
+            background-color: rgb(162, 219, 219);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+    <!-- 引入marked.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/marked.min.js"></script> <!-- 注意版本 -->
+</head>
+
+<body>
+    <h1>Chat</h1>
+    <div id="stream-data" class="clearfix"></div>
+
+    <div class="input-group">
+        <input type="text" id="u-input" class="form-control" placeholder="请输入消息">
+        <button id="u-btn" onclick="" class="btn btn-primary">发送</button>
+    </div>
+
+    <script>
+        const uInput = document.getElementById("u-input");
+        const uBtn = document.getElementById("u-btn");
+        // 显示数据
+        const dataDiv = document.getElementById("stream-data");
+        // api
+        const api_url = 'http://ip:port/chat';
+
+        async function postData(
+            url = '',
+            message = ''
+        ) {
+            const data = {
+                "model": "chat",
+                "messages": [
+                    { "role": "system", "content": "你是一个高级资深开发工程师" },
+                    { "role": "user", "content": message }
+                ]
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+
+            let fullResponse = "";
+            // 只创建一次
+            let newElement = document.createElement("div");
+
+            reader.read().then(function processText({ done, value }) {
+                if (done) {
+                    console.log("Stream complete");
+                    return;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                fullResponse += chunk; // 保持完整的响应内容
+
+                
+                newElement.className = 'message system'; // 给它添加“系统”消息样式
+                // newElement.textContent = fullResponse;  // 显示响应内容
+                newElement.innerHTML = marked.parse(fullResponse);  // 显示响应内容
+                dataDiv.appendChild(newElement);
+
+                // 滚动到底部
+                dataDiv.scrollTop = dataDiv.scrollHeight;
+
+                // 读取下一个数据块
+                return reader.read().then(processText);
+            });
+        }
+
+        uBtn.addEventListener("click", () => {
+            const message = uInput.value;
+            if (message) {
+                // 显示用户的输入
+                const userMessageElement = document.createElement("div");
+                userMessageElement.className = 'message user';
+                userMessageElement.textContent = message;
+                dataDiv.appendChild(userMessageElement);
+
+                // 清空输入框
+                uInput.value = '';
+
+                // 发送请求
+                postData(api_url, message).catch(e => console.error(e));
+            }
+        });
+
+        uInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                uBtn.click();
+            }
+        });
+
+    </script>
+</body>
+
+</html>
