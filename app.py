@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 CORS(app, supports_credentials=True)
 
-client = DeepSeekAI(api_key="sk-ea07a76abe5d40ea9afe01fb869427dd")
+client = DeepSeekAI(api_key="")
 
 
 def chat_response(model, messages):
