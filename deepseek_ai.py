@@ -39,7 +39,7 @@ class DeepSeekAI:
         
 
 if __name__ == '__main__':
-    # client = DeepSeekAI(api_key="sk-ea07a76abe5d40ea9afe01fb869427dd")
+    # client = DeepSeekAI(api_key="")
     # messages = [
     #     {"role": "system", "content": "你是一个高级资深开发工程师"},
     #     {"role": "user", "content": "冒泡排序的时间复杂度是多少"}
@@ -51,16 +51,4 @@ if __name__ == '__main__':
     #     s = s + chunk.choices[0].delta.content
 
     # print(s)
-    """
-    8-30个字符且只能包含以下限制条件中的字符
-    a小写字母
-    A大写字母
-    1数字
-    必须包含特殊字符0`@#$%人&*-_+=0：<>，？/
-    密码完成度
-    """
-    import random
-    password = random.choices(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`@#$%人&*", k=15
-    )
-    print("".join(password))
+    pass
